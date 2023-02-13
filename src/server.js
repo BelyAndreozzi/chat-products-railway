@@ -22,7 +22,7 @@ const args = parseArgs(process.argv.slice(2),optionsM)
 
 //sv
 const app = express()
-const PORT = args.p 
+const PORT = 8080
 const server = app.listen(PORT, () => console.log(`Server listening on port ${PORT}`))
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
