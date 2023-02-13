@@ -15,20 +15,15 @@ import { UserModel } from '../models/user.js'
 import { envConfig } from './config/envConfig.js'
 import parseArgs from 'minimist'
 import { fork } from 'child_process'
-import cluster from 'cluster'
-import os from 'os'
 
 //minimist
-const optionsM = { default: { p: 8080, m: 'fork' }, alias: { p: "port", m: "modo" } }
-const args = parseArgs(process.argv.slice(2), optionsM)
-
-const PORT = args.p
-const MODO = args.m
+const optionsM = {default:{p:8080}, alias:{p:"port"}}
+const args = parseArgs(process.argv.slice(2),optionsM)
 
 //sv
 const app = express()
-
-
+const PORT = args.p 
+const server = app.listen(PORT, () => console.log(`Server listening on port ${PORT}`))
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -63,60 +58,38 @@ app.use(session({
     saveUninitialized: false
 }))
 
-
-//Cluster 
-if (MODO === 'cluster' && cluster.isPrimary) {
-    const numCpus = os.cpus().length
-    console.log(numCpus);
-    for (let i = 0; i < numCpus; i++) {
-        cluster.fork()
-    }
-    cluster.on('exit',(worker)=>{
-        console.log(`El proceso ${worker.process.pid} dejó de funcionar`);
-        cluster.fork()
-    })
-} else {
-    //express
-    const server = app.listen(PORT, () => console.log(`Server listening on port ${PORT} on process ${process.pid}`))
-
-    //websocket
-    const io = new Server(server)
-
-    io.on('connection', async (socket) => {
-        console.log('Nuevo cliente conectado');
-
-        //productos
-        socket.emit('allProducts', await productos.getAll())
-
-        socket.on('newProduct', async (data) => {
-            await productos.save(data)
-
-
-            await productos.getAll()
-            io.sockets.emit('allProducts', await productos.getAll())
-        })
-
-        //mensajería 
-        socket.emit("allMessages", await mensajes.getAll());
-
-        //recibimos el mensaje
-        socket.on("newMsgs", async (data) => {
-            await mensajes.save(data);
-
-            socket.emit('allMessages', await mensajes.getAll())
-
-            io.sockets.emit("allMessages", await mensajes.getAll())
-        })
-    })
-}
-
-
-
 const productos = new ContenedorSQL(options.mariaDB, 'productos')
 const mensajes = new ContenedorSQL(options.sqliteDB, 'mensajes')
 
 
+const io = new Server(server)
 
+io.on('connection', async (socket) => {
+    console.log('Nuevo cliente conectado');
+
+    //productos
+    socket.emit('allProducts', await productos.getAll())
+
+    socket.on('newProduct', async (data) => {
+        await productos.save(data)
+
+
+        await productos.getAll()
+        io.sockets.emit('allProducts', await productos.getAll())
+    })
+
+    //mensajería 
+    socket.emit("allMessages", await mensajes.getAll());
+
+    //recibimos el mensaje
+    socket.on("newMsgs", async (data) => {
+        await mensajes.save(data);
+
+        socket.emit('allMessages', await mensajes.getAll())
+
+        io.sockets.emit("allMessages", await mensajes.getAll())
+    })
+})
 
 
 //Passport 
@@ -165,7 +138,7 @@ passport.use("loginStrategy", new LocalStrategy(
         UserModel.findOne({ email: username }, (err, userFound) => {
             if (err) { return done(err); }
             if (!userFound) { return done(null, false); }
-            if (userFound.password != password) { return done(null, { mensaje: "Contraseña incorrecta" }); }
+            if ( userFound.password != password) { return done(null, { mensaje: "Contraseña incorrecta" }); }
             return done(null, userFound)
         })
     }
@@ -190,7 +163,7 @@ app.post('/signup', passport.authenticate("signupStrategy", {
     res.redirect("/")
 })
 
-app.get('/failSignup', (req, res) => {
+app.get('/failSignup', (req,res)=>{
     res.render('failSignup')
 })
 
@@ -204,12 +177,12 @@ app.post('/login', passport.authenticate("loginStrategy", {
     failureMessage: true,
 
 }), (req, res) => {
-    const { email } = req.body
+    const {email} = req.body
     req.session.passport.username = email
     res.redirect("/")
 })
 
-app.get('/failLogin', (req, res) => {
+app.get('/failLogin', (req,res)=>{
     res.render('failLogin')
 })
 
@@ -220,26 +193,24 @@ app.get("/logout", (req, res) => {
     })
 })
 
-app.get("/info", (req, res) => {
-    res.render('info', {
-        argsEntrada: process.argv.slice(2),
-        sistOperativo: process.platform,
-        node: process.version,
-        rss: process.memoryUsage.rss(),
-        pathEjecucion: process.execPath,
-        pid: process.pid,
-        carpetaProyecto: process.cwd()
-    })
+app.get("/info", (req,res)=>{
+    res.render('info', {argsEntrada: process.argv.slice(2), 
+        sistOperativo: process.platform, 
+        node: process.version, 
+        rss: process.memoryUsage.rss(), 
+        pathEjecucion: process.execPath, 
+        pid: process.pid, 
+        carpetaProyecto: process.cwd()} )
 })
 
-app.get('/api/randoms', (req, res) => {
+app.get('/api/randoms', (req,res)=>{
     const child = fork('./src/childProcess/randomNumChild.js')
-    const cantNum = req.query.cantNum || 100000000
-    child.on('message', (childMsg) => {
+    const cantNum =  req.query.cantNum || 100000000
+    child.on('message', (childMsg)=>{
         if (childMsg == 'Listo') {
             child.send('Iniciar ' + cantNum)
         } else {
-            res.render('numerosRandom', { childMsg: JSON.stringify(childMsg) })
+            res.render('numerosRandom', {childMsg: JSON.stringify(childMsg)})
         }
     })
 
