@@ -1,0 +1,10 @@
+
+{{#if mensajes}}
+    {{#each mensajes}}
+        <p><span style="color:blue"><b>{{this.email}}</b></span>
+        <span style="color:brown"> {{this.date}}</span>
+        <span style="color:green"><i>{{this.msg}}</i> </span></p>
+    {{/each}}
+{{else}}
+<p>Se el primero en hablar :D</p>
+{{/if}}

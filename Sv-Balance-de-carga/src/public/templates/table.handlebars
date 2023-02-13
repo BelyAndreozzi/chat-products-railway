@@ -1,0 +1,24 @@
+<hr>
+{{#if products}}
+    <table class="table table-bordered table-sm table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Imagen</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each products}}
+            <tr>
+                <td>{{this.title}}</td>
+                <td>{{this.price}}</td>
+                <td><img width='100px' src={{this.thumbnail}} alt="thumbnail"/></td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+{{else}}
+<h3>No hay productos</h3>
+{{/if}}
+<hr>

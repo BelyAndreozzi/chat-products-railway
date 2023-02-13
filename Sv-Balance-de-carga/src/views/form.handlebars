@@ -1,0 +1,48 @@
+<div class="d-flex justify-content-between">
+    <h2> Bienvenido/a, {{email}}</h2>
+    <button onclick="location.href='/logout'" class='btn btn-danger me-2'>Log out</button>
+</div>
+
+
+<h3>Ingrese su producto</h3>
+<form id="productForm">
+    <div class="mb-3">
+        <label for='title' , class='form-label'>Nombre del producto</label>
+        <input type='text' , class='form-control' , name='title' , id="title">
+    </div>
+    <div class="mb-3">
+        <label for='price' , class='form-label'>Precio del producto</label>
+        <input type="number" , class='form-control' , name='price' , id="price">
+    </div>
+    <div class="mb-3">
+        <label for='thumbnail' , class='form-label'>Imagen</label>
+        <input type="text" , class='form-control' , name='thumbnail' , id="thumbnail" , aria-describedby='examples'>
+        <div id='examples' , class='form-text'>Recomendados:<br> <b>ESCUADRA</b>
+            (https://cdn3.iconfinder.com/data/icons/education-209/64/ruler-triangle-stationary-school-256.png),<br>
+            <b>CALCULADORA</b>
+            (https://cdn3.iconfinder.com/data/icons/education-209/64/calculator-math-tool-school-256.png), <br> <b>GLOBO
+                TERRÁQUEO</b>
+            (https://cdn3.iconfinder.com/data/icons/education-209/64/globe-earth-geograhy-planet-school-256.png),<br>
+            <b>LIBRO</b> (https://cdn1.iconfinder.com/data/icons/office-icons-17/512/ilustracoes_04-10-256.png), <br>
+            <b>LAPIZ</b> (https://cdn4.iconfinder.com/data/icons/small-n-flat/24/pencil-256.png),<br> <b>CARTUCHERA</b>
+            (https://cdn4.iconfinder.com/data/icons/back-to-school-149/64/pencil-case-office-tool-education-256.png)
+        </div>
+    </div>
+    <button type="submit" , class='btn btn-success me-2'>Enviar</button>
+</form>
+
+<div id="productsContainer"></div>
+
+<h3>Chat</h3>
+
+<p id="email"></p>
+<form id="chatForm">
+    <input type="text" id="messageChat">
+    <button type="submit">Enviar</button>
+</form>
+
+<div id="chatContainer"></div>
+
+{{> importScripts }}
+<script src="./socket.io/socket.io.js"></script>
+<script src="form.js"></script>
